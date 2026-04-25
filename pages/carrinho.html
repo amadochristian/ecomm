@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrinho | BragShirt</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/global.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .carrinho-page { display: grid; gap: var(--space-8); grid-template-columns: 1fr; }
+    @media (min-width: 1024px) { .carrinho-page { grid-template-columns: 1fr 380px; align-items: start; } }
+    .carrinho-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: var(--space-4);
+      padding: var(--space-4) 0;
+      border-bottom: 1px solid var(--cor-borda);
+      align-items: center;
+    }
+    .item-img {
+      width: 80px; height: 100px;
+      background: var(--cor-superficie-2);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+    }
+    .qty-control { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
+    .qty-control button {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--cor-superficie-2);
+      border: 1px solid var(--cor-borda);
+      color: var(--cor-texto);
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--trans-fast);
+    }
+    .qty-control button:hover { background: var(--cor-primaria); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="header-logo"><span>BRAG</span><span>SHIRT</span></a>
+      <nav class="header-nav"><a href="/">Início</a><a href="/pages/produtos.html">Camisetas</a></nav>
+      <div class="header-acoes">
+        <div id="headerUsuario"></div>
+      </div>
+    </div>
+  </header>
+
+  <main style="padding:var(--space-8) 0 var(--space-16)">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/">Início</a><span class="breadcrumb-sep">›</span>
+        <a href="/pages/produtos.html">Camisetas</a><span class="breadcrumb-sep">›</span>
+        <span>Carrinho</span>
+      </nav>
+      <h1 style="font-size:var(--text-3xl);margin-bottom:var(--space-8)">🛒 Meu Carrinho</h1>
+
+      <div class="carrinho-page">
+        <!-- ITENS -->
+        <div>
+          <div id="listaItens"></div>
+          <div id="carrinhoVazio" style="display:none;text-align:center;padding:var(--space-16)">
+            <div style="font-size:5rem;margin-bottom:var(--space-4)">🛒</div>
+            <h2>Seu carrinho está vazio</h2>
+            <p style="color:var(--cor-texto-muted);margin-bottom:var(--space-6)">Explore nossa coleção e encontre a camisa perfeita!</p>
+            <a href="/pages/produtos.html" class="btn btn-primario btn-lg">Ver camisetas →</a>
+          </div>
+        </div>
+
+        <!-- RESUMO -->
+        <div id="resumoCarrinho" style="display:none">
+          <div class="card" style="padding:var(--space-6);position:sticky;top:calc(var(--header-h) + var(--space-4))">
+            <h3 style="margin-bottom:var(--space-4)">Resumo</h3>
+            <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-3)">
+              <span style="color:var(--cor-texto-muted)">Subtotal</span>
+              <span id="resumoSubtotal" style="font-weight:600"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-3)">
+              <span style="color:var(--cor-texto-muted)">Frete</span>
+              <span style="color:var(--cor-acento);font-size:var(--text-sm)">Calculado no checkout</span>
+            </div>
+            <div class="divider"></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-6)">
+              <span style="font-weight:700;font-size:var(--text-lg)">Subtotal</span>
+              <span id="resumoTotal" style="font-weight:700;font-size:var(--text-2xl);color:var(--cor-secundaria)"></span>
+            </div>
+            <a href="/pages/checkout.html" class="btn btn-acento btn-lg btn-block">Finalizar compra →</a>
+            <a href="/pages/produtos.html" class="btn btn-ghost btn-block mt-4">Continuar comprando</a>
+            <div style="margin-top:var(--space-4);text-align:center;font-size:var(--text-xs);color:var(--cor-texto-muted)">
+              🔒 Pagamento seguro via Mercado Pago
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { aplicarTema, formatarMoeda } from '/js/config.js';
+    import { getCarrinho, removerDoCarrinho, atualizarQuantidade, calcularTotais } from '/js/carrinho.js';
+    import { getUsuarioAtual } from '/js/supabase.js';
+
+    aplicarTema();
+    const usuario = await getUsuarioAtual();
+    const headerEl = document.getElementById('headerUsuario');
+    headerEl.innerHTML = usuario
+      ? `<a href="/pages/minha-conta.html" class="btn btn-sm btn-ghost">👤 ${usuario.perfil?.nome || usuario.email.split('@')[0]}</a>`
+      : `<a href="/pages/login.html" class="btn btn-sm btn-ghost">Entrar</a>`;
+
+    function renderizar() {
+      const { itens, subtotal, total } = calcularTotais();
+      const listaEl = document.getElementById('listaItens');
+      const vazioEl = document.getElementById('carrinhoVazio');
+      const resumoEl = document.getElementById('resumoCarrinho');
+
+      if (!itens.length) {
+        listaEl.style.display = 'none';
+        vazioEl.style.display = 'block';
+        resumoEl.style.display = 'none';
+        return;
+      }
+
+      listaEl.style.display = 'block';
+      vazioEl.style.display = 'none';
+      resumoEl.style.display = 'block';
+
+      listaEl.innerHTML = itens.map(item => `
+        <div class="carrinho-item">
+          <div class="item-img">👕</div>
+          <div>
+            <a href="/pages/produto.html?slug=${item.slug}" style="font-weight:700;display:block;margin-bottom:4px">${item.nome}</a>
+            <div style="font-size:var(--text-sm);color:var(--cor-texto-muted);margin-bottom:var(--space-2)">${item.tamanho} • ${item.modelo}</div>
+            <div class="qty-control">
+              <button onclick="alterar('${item.chave}', ${item.quantidade - 1})">−</button>
+              <span style="font-weight:700">${item.quantidade}</span>
+              <button onclick="alterar('${item.chave}', ${item.quantidade + 1})">+</button>
+              <button onclick="remover('${item.chave}')" style="color:var(--cor-erro);font-size:var(--text-sm);margin-left:var(--space-2)">🗑️ Remover</button>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-weight:700;color:var(--cor-secundaria);font-size:var(--text-xl)">${formatarMoeda(item.preco * item.quantidade)}</div>
+            <div style="font-size:var(--text-xs);color:var(--cor-texto-muted)">${formatarMoeda(item.preco)} / un.</div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('resumoSubtotal').textContent = formatarMoeda(subtotal);
+      document.getElementById('resumoTotal').textContent = formatarMoeda(total);
+    }
+
+    window.alterar = (chave, qty) => { atualizarQuantidade(chave, qty); renderizar(); };
+    window.remover = (chave) => { removerDoCarrinho(chave); renderizar(); };
+
+    renderizar();
+  </script>
+</body>
+</html>

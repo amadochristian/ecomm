@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Conta | BragShirt</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/assets/favicon.ico">
+<link rel="stylesheet" href="/css/global.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+.conta-layout{display:grid;gap:2rem;grid-template-columns:1fr}
+@media(min-width:1024px){.conta-layout{grid-template-columns:260px 1fr;align-items:start}}
+.conta-nav a{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:12px;color:var(--cor-texto-muted);font-size:.875rem;font-weight:500;transition:all .25s ease;margin-bottom:.25rem}
+.conta-nav a:hover{background:var(--cor-superficie);color:var(--cor-texto)}
+.conta-nav a.ativo{background:rgba(13,71,161,.15);color:var(--cor-primaria)}
+.conta-section{display:none}
+.conta-section.ativo{display:block}
+.pedido-card{background:var(--cor-superficie);border:1px solid var(--cor-borda);border-radius:20px;overflow:hidden;margin-bottom:1rem}
+.pedido-header{padding:1rem 1.5rem;border-bottom:1px solid var(--cor-borda);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+.pedido-body{padding:1rem 1.5rem}
+</style>
+</head>
+<body>
+<header class="header">
+<div class="container header-inner">
+<a href="/" class="header-logo"><span>BRAG</span><span>SHIRT</span></a>
+<nav class="header-nav"><a href="/">Inicio</a><a href="/pages/produtos.html">Camisetas</a></nav>
+<div class="header-acoes">
+<a href="/pages/carrinho.html" class="btn-icone">&#x1F6D2;</a>
+<button class="btn btn-sm btn-ghost" id="btnLogout">Sair</button>
+</div>
+</div>
+</header>
+<main style="padding:2rem 0 5rem">
+<div class="container">
+<h1 style="font-size:clamp(1.5rem,4vw,3rem);margin-bottom:2rem">&#x1F464; Minha Conta</h1>
+<div class="conta-layout">
+<div>
+<div class="card" style="padding:1.5rem;text-align:center;margin-bottom:1rem">
+<div style="width:72px;height:72px;background:var(--cor-primaria);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;margin:0 auto 1rem" id="avatarLetra">?</div>
+<div style="font-weight:700" id="nomeUsuario">Carregando...</div>
+<div style="font-size:.875rem;color:var(--cor-texto-muted)" id="emailUsuario"></div>
+</div>
+<nav class="conta-nav card" style="padding:.75rem">
+<a href="#pedidos" class="ativo" onclick="mostrarSecao(event,'pedidos')">&#x1F4E6; Meus Pedidos</a>
+<a href="#perfil" onclick="mostrarSecao(event,'perfil')">&#x270F;&#xFE0F; Editar Perfil</a>
+<a href="#seguranca" onclick="mostrarSecao(event,'seguranca')">&#x1F512; Seguranca</a>
+</nav>
+</div>
+<div>
+<div class="conta-section ativo" id="sec-pedidos">
+<h2 style="font-size:1.5rem;margin-bottom:1.5rem">&#x1F4E6; Meus Pedidos</h2>
+<div id="listaPedidos"><div style="text-align:center;padding:3rem"><div class="spinner spinner-lg" style="margin:0 auto;border-top-color:var(--cor-primaria)"></div></div></div>
+</div>
+<div class="conta-section" id="sec-perfil">
+<h2 style="font-size:1.5rem;margin-bottom:1.5rem">&#x270F;&#xFE0F; Editar Perfil</h2>
+<div class="card" style="padding:1.5rem">
+<form id="formPerfil">
+<div class="form-group"><label class="form-label">Nome completo</label><input type="text" class="form-input" id="perfilNome" placeholder="Seu nome"></div>
+<div class="form-group"><label class="form-label">E-mail</label><input type="email" class="form-input" id="perfilEmail" disabled style="opacity:.5"><span class="form-help">O e-mail nao pode ser alterado</span></div>
+<div class="form-group"><label class="form-label">Telefone</label><input type="tel" class="form-input" id="perfilTelefone" placeholder="(11) 99999-9999"></div>
+<div class="form-group"><label class="form-label">CEP</label><input type="text" class="form-input" id="perfilCep" placeholder="00000-000"></div>
+<div class="form-group"><label class="form-label">Endereco</label><input type="text" class="form-input" id="perfilEndereco" placeholder="Rua, numero..."></div>
+<div id="msgPerfil" style="display:none;padding:.75rem;border-radius:12px;margin-bottom:1rem;font-size:.875rem"></div>
+<button type="submit" class="btn btn-primario">Salvar</button>
+</form>
+</div>
+</div>
+<div class="conta-section" id="sec-seguranca">
+<h2 style="font-size:1.5rem;margin-bottom:1.5rem">&#x1F512; Seguranca</h2>
+<div class="card" style="padding:1.5rem">
+<h3 style="margin-bottom:1rem">Alterar Senha</h3>
+<form id="formSenha">
+<div class="form-group"><label class="form-label">Nova senha</label><input type="password" class="form-input" id="novaSenha" placeholder="Minimo 6 caracteres" minlength="6"></div>
+<div class="form-group"><label class="form-label">Confirmar senha</label><input type="password" class="form-input" id="confirmarSenha" placeholder="Repita a senha"></div>
+<div id="msgSenha" style="display:none;padding:.75rem;border-radius:12px;margin-bottom:1rem;font-size:.875rem"></div>
+<button type="submit" class="btn btn-primario">Alterar Senha</button>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp-float">&#x1F4AC;</a>
+<script type="module">
+import{aplicarTema,formatarMoeda,formatarData}from"/js/config.js";
+import{exigirLogin,getUsuarioAtual,getMeusPedidos,atualizarPerfil,logout,getLogsPedido}from"/js/supabase.js";
+aplicarTema();
+const usuario=await exigirLogin();
+if(!usuario)throw new Error("not logged");
+const nome=usuario.perfil?.nome||usuario.email.split("@")[0];
+document.getElementById("avatarLetra").textContent=nome[0].toUpperCase();
+document.getElementById("nomeUsuario").textContent=nome;
+document.getElementById("emailUsuario").textContent=usuario.email;
+document.getElementById("perfilNome").value=usuario.perfil?.nome||"";
+document.getElementById("perfilEmail").value=usuario.email;
+document.getElementById("perfilTelefone").value=usuario.perfil?.telefone||"";
+document.getElementById("perfilCep").value=usuario.perfil?.cep||"";
+document.getElementById("perfilEndereco").value=usuario.perfil?.endereco||"";
+window.mostrarSecao=(e,id)=>{
+e.preventDefault();
+document.querySelectorAll(".conta-section").forEach(s=>s.classList.remove("ativo"));
+document.getElementById("sec-"+id)?.classList.add("ativo");
+document.querySelectorAll(".conta-nav a").forEach(a=>a.classList.remove("ativo"));
+e.target.classList.add("ativo");
+if(id==="pedidos")carregarPedidos();
+};
+const statusIcon={pendente:"&#x1F7E1;",pago:"&#x1F535;",enviado:"&#x1F7E2;",entregue:"&#x26AB;",cancelado:"&#x1F534;"};
+const statusLabel={pendente:"Pendente",pago:"Pago",enviado:"Enviado",entregue:"Entregue",cancelado:"Cancelado"};
+async function carregarPedidos(){
+const el=document.getElementById("listaPedidos");
+try{
+const pedidos=await getMeusPedidos();
+if(!pedidos.length){el.innerHTML=`<div style="text-align:center;padding:3rem"><div style="font-size:4rem;margin-bottom:1rem">&#x1F4E6;</div><h3>Nenhum pedido ainda</h3><p style="color:var(--cor-texto-muted);margin-bottom:1.5rem">Explore nossa colecao!</p><a href="/pages/produtos.html" class="btn btn-primario">Ver camisetas</a></div>`;return;}
+el.innerHTML=pedidos.map(p=>{
+const itens=JSON.parse(p.itens||"[]");
+return`<div class="pedido-card"><div class="pedido-header"><div><div style="font-weight:700">Pedido #${p.id}</div><div style="font-size:.875rem;color:var(--cor-texto-muted)">${formatarData(p.criado_em)}</div></div><span class="status-badge status-${p.status}">${statusIcon[p.status]||""} ${statusLabel[p.status]||p.status}</span></div><div class="pedido-body">${itens.map(i=>`<div style="display:flex;justify-content:space-between;font-size:.875rem;padding:.5rem 0;border-bottom:1px solid var(--cor-borda)"><span>&#x1F455; ${i.nome} - ${i.tamanho}/${i.modelo} x${i.quantidade}</span><span style="font-weight:700">${formatarMoeda(i.preco*i.quantidade)}</span></div>`).join("")}<div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;flex-wrap:wrap;gap:.75rem"><div>${p.tracking_code?`<div style="font-size:.875rem">&#x1F4CD; Rastreio: <strong style="color:var(--cor-secundaria)">${p.tracking_code}</strong></div>`:""}</div><div style="text-align:right"><div style="font-size:.75rem;color:var(--cor-texto-muted)">Total</div><div style="font-size:1.5rem;font-weight:700;color:var(--cor-secundaria)">${formatarMoeda(p.total)}</div></div></div><button class="btn btn-sm btn-ghost" style="margin-top:.75rem" onclick="toggleLogs(${p.id},this)">Ver historico</button><div id="logs-${p.id}" style="display:none;margin-top:1rem"><div class="timeline" id="timeline-${p.id}"><div style="color:var(--cor-texto-muted);font-size:.875rem">Carregando...</div></div></div></div></div>`;
+}).join("");
+}catch(e){el.innerHTML=`<p style="color:var(--cor-erro)">Erro: ${e.message}</p>`;}
+}
+carregarPedidos();
+window.toggleLogs=async(pedidoId,btn)=>{
+const el=document.getElementById("logs-"+pedidoId);
+const aberto=el.style.display!=="none";
+el.style.display=aberto?"none":"block";
+btn.textContent=aberto?"Ver historico":"Ocultar historico";
+if(!aberto){
+try{
+const logs=await getLogsPedido(pedidoId);
+const t=document.getElementById("timeline-"+pedidoId);
+t.innerHTML=logs.map(l=>`<div class="timeline-item"><div class="timeline-dot" style="font-size:.75rem">&#x2713;</div><div class="timeline-content"><div class="timeline-evento">${l.evento}</div>${l.detalhes?`<div class="timeline-detalhes">${l.detalhes}</div>`:""}<div class="timeline-data">${formatarData(l.criado_em)}</div></div></div>`).join("")||"<div style='color:var(--cor-texto-muted);font-size:.875rem'>Sem eventos</div>";
+}catch(e){console.error(e);}
+}
+};
+document.getElementById("formPerfil")?.addEventListener("submit",async e=>{
+e.preventDefault();
+const msg=document.getElementById("msgPerfil");
+try{
+await atualizarPerfil({nome:document.getElementById("perfilNome").value.trim(),telefone:document.getElementById("perfilTelefone").value.trim(),cep:document.getElementById("perfilCep").value.trim(),endereco:document.getElementById("perfilEndereco").value.trim()});
+msg.textContent="Perfil atualizado!";
+msg.style.cssText="display:block;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--cor-sucesso)";
+}catch(err){msg.textContent="Erro: "+err.message;msg.style.cssText="display:block;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--cor-erro)";}
+setTimeout(()=>msg.style.display="none",3000);
+});
+document.getElementById("formSenha")?.addEventListener("submit",async e=>{
+e.preventDefault();
+const nova=document.getElementById("novaSenha").value;
+const conf=document.getElementById("confirmarSenha").value;
+const msg=document.getElementById("msgSenha");
+if(nova!==conf){msg.textContent="Senhas nao coincidem";msg.style.cssText="display:block;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--cor-erro)";return;}
+try{
+const{getSupabase}=await import("/js/supabase.js");
+const sb=getSupabase();
+const{error}=await sb.auth.updateUser({password:nova});
+if(error)throw error;
+msg.textContent="Senha alterada!";
+msg.style.cssText="display:block;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--cor-sucesso)";
+e.target.reset();
+}catch(err){msg.textContent="Erro: "+err.message;msg.style.cssText="display:block;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--cor-erro)";}
+setTimeout(()=>msg.style.display="none",3000);
+});
+document.getElementById("btnLogout")?.addEventListener("click",async()=>await logout());
+const hash=window.location.hash.slice(1);
+if(hash){const link=document.querySelector(`.conta-nav a[href="#${hash}"]`);if(link){link.click();}}
+</script>
+</body>
+</html>

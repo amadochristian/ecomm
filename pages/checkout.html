@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finalizar Compra | BragShirt</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/global.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .checkout-grid {
+      display: grid;
+      gap: var(--space-8);
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 1024px) {
+      .checkout-grid { grid-template-columns: 1fr 420px; align-items: start; }
+    }
+    .checkout-step {
+      background: var(--cor-superficie);
+      border: 1px solid var(--cor-borda);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin-bottom: var(--space-4);
+    }
+    .checkout-step h3 {
+      font-size: var(--text-xl);
+      margin-bottom: var(--space-6);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--cor-borda);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .resumo-item {
+      display: flex;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--cor-borda);
+    }
+    .resumo-item img, .resumo-item-img {
+      width: 64px;
+      height: 80px;
+      background: var(--cor-superficie-2);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+    .frete-opcao {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border: 2px solid var(--cor-borda);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: border-color var(--trans-fast);
+      margin-bottom: var(--space-3);
+    }
+    .frete-opcao.selecionado { border-color: var(--cor-primaria); background: rgba(13,71,161,0.08); }
+    .frete-opcao input { accent-color: var(--cor-primaria); }
+    .cupom-row { display: flex; gap: var(--space-3); }
+    .total-row { display: flex; justify-content: space-between; padding: var(--space-2) 0; font-size: var(--text-sm); }
+    .total-row.destaque { font-size: var(--text-xl); font-weight: 700; padding-top: var(--space-4); border-top: 1px solid var(--cor-borda); }
+    .total-row.destaque span:last-child { color: var(--cor-secundaria); }
+  </style>
+</head>
+<body>
+
+  <!-- Header mínimo no checkout -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="header-logo"><span>BRAG</span><span>SHIRT</span></a>
+      <div style="display:flex;align-items:center;gap:var(--space-4);font-size:var(--text-sm);color:var(--cor-texto-muted)">
+        🔒 Compra 100% segura
+      </div>
+    </div>
+  </header>
+
+  <main style="padding:var(--space-8) 0 var(--space-16)">
+    <div class="container">
+      <h1 style="font-size:var(--text-3xl);margin-bottom:var(--space-8)">🛒 Finalizar Compra</h1>
+
+      <div class="checkout-grid">
+
+        <!-- ——— COLUNA ESQUERDA: Formulários ——— -->
+        <div>
+
+          <!-- ENDEREÇO -->
+          <div class="checkout-step">
+            <h3>📍 Endereço de Entrega</h3>
+            <div class="grid-2" style="gap:var(--space-4)">
+              <div class="form-group" style="grid-column:1/-1">
+                <label class="form-label">CEP</label>
+                <div style="display:flex;gap:var(--space-3)">
+                  <input type="text" class="form-input" id="cep" placeholder="00000-000" maxlength="9" style="max-width:180px">
+                  <button class="btn btn-ghost" id="btnBuscarCep">Buscar</button>
+                </div>
+                <span class="form-help">Digite o CEP para calcular o frete</span>
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label class="form-label">Rua / Logradouro</label>
+                <input type="text" class="form-input" id="rua" placeholder="Rua das Camisetas">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Número</label>
+                <input type="text" class="form-input" id="numero" placeholder="123">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Complemento</label>
+                <input type="text" class="form-input" id="complemento" placeholder="Apto, bloco...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bairro</label>
+                <input type="text" class="form-input" id="bairro" placeholder="Centro">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cidade</label>
+                <input type="text" class="form-input" id="cidade" placeholder="São Paulo">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Estado</label>
+                <select class="form-input form-select" id="estado">
+                  <option value="">Selecione</option>
+                  <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                  <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                  <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                  <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                  <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                  <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                  <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                  <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                  <option value="SP" selected>SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- FRETE -->
+          <div class="checkout-step">
+            <h3>🚚 Opções de Frete</h3>
+            <div id="freteOpcoes">
+              <p style="color:var(--cor-texto-muted);font-size:var(--text-sm)">
+                Digite o CEP acima para ver as opções de frete.
+              </p>
+            </div>
+          </div>
+
+          <!-- CUPOM -->
+          <div class="checkout-step">
+            <h3>🏷️ Cupom de Desconto</h3>
+            <div class="cupom-row">
+              <input type="text" class="form-input" id="cupomCodigo" placeholder="COPA2026" style="text-transform:uppercase">
+              <button class="btn btn-ghost" id="btnAplicarCupom">Aplicar</button>
+            </div>
+            <div id="cupomMsg" style="margin-top:var(--space-3);display:none;font-size:var(--text-sm)"></div>
+          </div>
+
+          <!-- DADOS PESSOAIS (confirmação) -->
+          <div class="checkout-step">
+            <h3>👤 Dados do Comprador</h3>
+            <div id="dadosUsuario" style="color:var(--cor-texto-muted);font-size:var(--text-sm)">
+              Carregando...
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ——— COLUNA DIREITA: Resumo ——— -->
+        <div>
+          <div class="checkout-step" style="position:sticky;top:calc(var(--header-h) + var(--space-4))">
+            <h3>📋 Resumo do Pedido</h3>
+
+            <!-- Itens -->
+            <div id="resumoItens"></div>
+
+            <!-- Totais -->
+            <div style="margin-top:var(--space-4)">
+              <div class="total-row">
+                <span>Subtotal</span>
+                <span id="resumoSubtotal">R$ —</span>
+              </div>
+              <div class="total-row" id="rowFrete">
+                <span>Frete</span>
+                <span id="resumoFrete">—</span>
+              </div>
+              <div class="total-row" id="rowDesconto" style="display:none">
+                <span style="color:var(--cor-acento)">Desconto</span>
+                <span style="color:var(--cor-acento)" id="resumoDesconto">−R$ 0</span>
+              </div>
+              <div class="total-row destaque">
+                <span>TOTAL</span>
+                <span id="resumoTotal">R$ —</span>
+              </div>
+              <p style="font-size:var(--text-xs);color:var(--cor-texto-muted);margin-top:var(--space-2)">
+                ou 12x de <span id="resumoParcela">R$ —</span> sem juros
+              </p>
+            </div>
+
+            <div id="erroCheckout" style="display:none;padding:var(--space-3);background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--cor-erro);margin:var(--space-4) 0"></div>
+
+            <button class="btn btn-acento btn-lg btn-block" id="btnFinalizarPedido" style="margin-top:var(--space-4)">
+              Ir para pagamento →
+            </button>
+
+            <div style="margin-top:var(--space-4);text-align:center;font-size:var(--text-xs);color:var(--cor-texto-muted);display:flex;align-items:center;justify-content:center;gap:var(--space-2)">
+              🔒 Pagamento processado pelo Mercado Pago
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { CONFIG, aplicarTema, formatarMoeda } from '/js/config.js';
+    import { getCarrinho, calcularTotais } from '/js/carrinho.js';
+    import { calcularFrete, criarPreferenciaPagamento } from '/js/produtos.js';
+    import { exigirLogin, criarPedido, getUsuarioAtual } from '/js/supabase.js';
+
+    aplicarTema();
+
+    // ——— Exigir login ———
+    const usuario = await exigirLogin();
+    if (!usuario) return;
+
+    // Preencher dados do usuário
+    document.getElementById('dadosUsuario').innerHTML = `
+      <div style="display:grid;gap:var(--space-2)">
+        <div>👤 <strong>${usuario.perfil?.nome || 'Nome não informado'}</strong></div>
+        <div>📧 ${usuario.email}</div>
+        <div>📱 ${usuario.perfil?.telefone || 'Telefone não informado'}</div>
+        <a href="/pages/minha-conta.html" style="color:var(--cor-primaria);font-size:var(--text-xs);margin-top:var(--space-2)">Editar dados →</a>
+      </div>
+    `;
+
+    // ——— Verificar carrinho ———
+    const carrinho = getCarrinho();
+    if (!carrinho.length) {
+      window.location.href = '/pages/carrinho.html';
+      return;
+    }
+
+    let freteSelecionado = null;
+    let desconto = 0;
+    let cupomCodigo = null;
+
+    // ——— Renderizar itens do resumo ———
+    function renderizarResumo() {
+      const { itens, subtotal, total } = calcularTotais(freteSelecionado?.preco || 0, desconto);
+
+      document.getElementById('resumoItens').innerHTML = itens.map(item => `
+        <div class="resumo-item">
+          <div class="resumo-item-img">👕</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:var(--text-sm)">${item.nome}</div>
+            <div style="font-size:var(--text-xs);color:var(--cor-texto-muted)">${item.tamanho} • ${item.modelo}</div>
+            <div style="font-size:var(--text-xs);color:var(--cor-texto-muted)">Qtd: ${item.quantidade}</div>
+          </div>
+          <div style="font-weight:700;font-size:var(--text-sm);color:var(--cor-secundaria)">${formatarMoeda(item.preco * item.quantidade)}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('resumoSubtotal').textContent = formatarMoeda(subtotal);
+      document.getElementById('resumoFrete').textContent = freteSelecionado
+        ? (freteSelecionado.preco === 0 ? '🎉 Grátis' : formatarMoeda(freteSelecionado.preco))
+        : '—';
+      document.getElementById('resumoTotal').textContent = freteSelecionado ? formatarMoeda(total) : formatarMoeda(subtotal);
+      document.getElementById('resumoParcela').textContent = freteSelecionado ? formatarMoeda(total / 12) : '—';
+
+      if (desconto > 0) {
+        document.getElementById('rowDesconto').style.display = 'flex';
+        document.getElementById('resumoDesconto').textContent = `−${formatarMoeda(desconto)}`;
+      }
+    }
+    renderizarResumo();
+
+    // ——— Buscar CEP ———
+    document.getElementById('cep').addEventListener('input', (e) => {
+      let v = e.target.value.replace(/\D/g, '');
+      if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5,8);
+      e.target.value = v;
+    });
+
+    document.getElementById('btnBuscarCep').addEventListener('click', async () => {
+      const cep = document.getElementById('cep').value.replace(/\D/g, '');
+      if (cep.length !== 8) { alert('CEP inválido'); return; }
+
+      const btn = document.getElementById('btnBuscarCep');
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      try {
+        // Buscar endereço via ViaCEP
+        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const data = await res.json();
+        if (!data.erro) {
+          document.getElementById('rua').value = data.logradouro || '';
+          document.getElementById('bairro').value = data.bairro || '';
+          document.getElementById('cidade').value = data.localidade || '';
+          document.getElementById('estado').value = data.uf || 'SP';
+        }
+
+        // Calcular frete
+        const opcoes = await calcularFrete({ cep, itens: carrinho });
+        renderizarOpcooesFrete(opcoes);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Buscar';
+      }
+    });
+
+    function renderizarOpcooesFrete(opcoes) {
+      const { subtotal } = calcularTotais();
+      const gratis = subtotal >= CONFIG.freteGratisAcima;
+
+      const el = document.getElementById('freteOpcoes');
+      if (gratis) {
+        el.innerHTML = '<div class="frete-gratis-badge">🎉 Frete grátis para este pedido!</div>';
+        freteSelecionado = { nome: 'Frete Grátis', preco: 0 };
+        renderizarResumo();
+        return;
+      }
+
+      el.innerHTML = opcoes.map((op, i) => `
+        <label class="frete-opcao ${i === 0 ? 'selecionado' : ''}" onclick="selecionarFrete(this, '${op.nome}', ${op.preco})">
+          <input type="radio" name="frete" value="${op.id}" ${i === 0 ? 'checked' : ''} style="accent-color:var(--cor-primaria)">
+          <span style="font-size:1.2rem">${op.logo}</span>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:var(--text-sm)">${op.empresa} — ${op.nome}</div>
+            <div style="font-size:var(--text-xs);color:var(--cor-texto-muted)">Entrega em até ${op.prazo} dias úteis</div>
+          </div>
+          <span style="font-weight:700;color:var(--cor-secundaria)">${formatarMoeda(op.preco)}</span>
+        </label>
+      `).join('');
+
+      // Selecionar primeiro por padrão
+      if (opcoes.length) {
+        freteSelecionado = opcoes[0];
+        renderizarResumo();
+      }
+    }
+
+    window.selecionarFrete = (el, nome, preco) => {
+      document.querySelectorAll('.frete-opcao').forEach(o => o.classList.remove('selecionado'));
+      el.classList.add('selecionado');
+      freteSelecionado = { nome, preco };
+      renderizarResumo();
+    };
+
+    // ——— Cupom ———
+    document.getElementById('btnAplicarCupom').addEventListener('click', async () => {
+      const codigo = document.getElementById('cupomCodigo').value.trim().toUpperCase();
+      const msgEl = document.getElementById('cupomMsg');
+      if (!codigo) return;
+
+      try {
+        const { calcularDesconto } = await import('/js/supabase.js');
+        const { subtotal } = calcularTotais();
+        desconto = await calcularDesconto(codigo, subtotal);
+        cupomCodigo = codigo;
+        msgEl.innerHTML = `<span style="color:var(--cor-acento)">✅ Cupom aplicado! Desconto de ${formatarMoeda(desconto)}</span>`;
+        msgEl.style.display = 'block';
+        renderizarResumo();
+      } catch (err) {
+        msgEl.innerHTML = `<span style="color:var(--cor-erro)">❌ ${err.message}</span>`;
+        msgEl.style.display = 'block';
+        desconto = 0;
+        cupomCodigo = null;
+      }
+    });
+
+    // ——— Finalizar pedido ———
+    document.getElementById('btnFinalizarPedido').addEventListener('click', async () => {
+      const erroEl = document.getElementById('erroCheckout');
+      erroEl.style.display = 'none';
+
+      // Validações
+      if (!freteSelecionado) { erroEl.textContent = 'Selecione uma opção de frete.'; erroEl.style.display = 'block'; return; }
+      if (!document.getElementById('cep').value) { erroEl.textContent = 'Informe o CEP de entrega.'; erroEl.style.display = 'block'; return; }
+
+      const btn = document.getElementById('btnFinalizarPedido');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="border-top-color:var(--cor-fundo);width:20px;height:20px"></div> Processando...';
+
+      try {
+        const endereco = {
+          cep: document.getElementById('cep').value,
+          rua: document.getElementById('rua').value,
+          numero: document.getElementById('numero').value,
+          complemento: document.getElementById('complemento').value,
+          bairro: document.getElementById('bairro').value,
+          cidade: document.getElementById('cidade').value,
+          estado: document.getElementById('estado').value,
+        };
+
+        // 1. Criar pedido no banco
+        const pedido = await criarPedido({
+          itens: carrinho,
+          frete: freteSelecionado,
+          endereco,
+          cupom: cupomCodigo,
+        });
+
+        // 2. Criar preferência no Mercado Pago
+        const preferencia = await criarPreferenciaPagamento({ pedido, usuario });
+
+        // 3. Redirecionar para o Mercado Pago
+        const url = CONFIG.mercadoPagoPublicKey.startsWith('TEST')
+          ? preferencia.sandbox_init_point
+          : preferencia.init_point;
+
+        window.location.href = url;
+
+      } catch (err) {
+        console.error(err);
+        erroEl.textContent = `Erro ao processar pedido: ${err.message}. Tente novamente.`;
+        erroEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Ir para pagamento →';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar | BragShirt</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/global.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+      background: linear-gradient(135deg, var(--cor-fundo) 0%, #0d1a3a 100%);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--cor-superficie);
+      border: 1px solid var(--cor-borda);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8);
+    }
+    .auth-logo {
+      text-align: center;
+      margin-bottom: var(--space-8);
+    }
+    .tabs {
+      display: flex;
+      gap: 0;
+      background: var(--cor-superficie-2);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: var(--space-6);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: var(--space-3);
+      border-radius: calc(var(--radius-md) - 2px);
+      font-weight: 600;
+      font-size: var(--text-sm);
+      color: var(--cor-texto-muted);
+      transition: all var(--trans-base);
+    }
+    .tab-btn.ativo {
+      background: var(--cor-primaria);
+      color: white;
+    }
+    .divider-social {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin: var(--space-6) 0;
+      color: var(--cor-texto-muted);
+      font-size: var(--text-sm);
+    }
+    .divider-social::before,
+    .divider-social::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--cor-borda);
+    }
+  </style>
+</head>
+<body>
+
+<main class="auth-page">
+  <div class="auth-card animate-fade-in">
+    <div class="auth-logo">
+      <a href="/" class="header-logo" style="font-size:var(--text-4xl);display:inline-block">
+        <span>BRAG</span><span>SHIRT</span>
+      </a>
+      <p style="color:var(--cor-texto-muted);margin-top:var(--space-2);font-size:var(--text-sm)">
+        Veste a Garra, Vive a Copa
+      </p>
+    </div>
+
+    <!-- Tabs Login / Cadastro -->
+    <div class="tabs">
+      <button class="tab-btn ativo" id="tabLogin" onclick="mudarAba('login')">Entrar</button>
+      <button class="tab-btn" id="tabCadastro" onclick="mudarAba('cadastro')">Criar conta</button>
+    </div>
+
+    <!-- ——— FORMULÁRIO LOGIN ——— -->
+    <form id="formLogin" novalidate>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="seu@email.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="display:flex;justify-content:space-between">
+          Senha
+          <a href="#" id="linkEsqueciSenha" style="font-size:var(--text-xs);color:var(--cor-primaria)">Esqueci a senha</a>
+        </label>
+        <div style="position:relative">
+          <input type="password" class="form-input" id="loginSenha" placeholder="••••••••" required autocomplete="current-password">
+          <button type="button" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:var(--cor-texto-muted)" id="toggleSenhaLogin">👁️</button>
+        </div>
+      </div>
+      <div id="erroLogin" style="color:var(--cor-erro);font-size:var(--text-sm);margin-bottom:var(--space-3);display:none"></div>
+      <button type="submit" class="btn btn-primario btn-block btn-lg" id="btnLogin">
+        Entrar
+      </button>
+    </form>
+
+    <!-- ——— FORMULÁRIO CADASTRO ——— -->
+    <form id="formCadastro" style="display:none" novalidate>
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input type="text" class="form-input" id="cadNome" placeholder="Seu nome" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" class="form-input" id="cadEmail" placeholder="seu@email.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefone / WhatsApp</label>
+        <input type="tel" class="form-input" id="cadTelefone" placeholder="(11) 99999-9999">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <div style="position:relative">
+          <input type="password" class="form-input" id="cadSenha" placeholder="Mínimo 6 caracteres" required minlength="6">
+          <button type="button" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:var(--cor-texto-muted)" id="toggleSenhaCad">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:flex-start;gap:var(--space-3);cursor:pointer;font-size:var(--text-sm);color:var(--cor-texto-muted)">
+          <input type="checkbox" id="aceitaTermos" style="margin-top:3px;accent-color:var(--cor-primaria)">
+          Li e aceito os <a href="/pages/termos-uso.html" target="_blank" style="color:var(--cor-primaria)">Termos de Uso</a> e a <a href="/pages/politica-privacidade.html" target="_blank" style="color:var(--cor-primaria)">Política de Privacidade</a>
+        </label>
+      </div>
+      <div id="erroCadastro" style="color:var(--cor-erro);font-size:var(--text-sm);margin-bottom:var(--space-3);display:none"></div>
+      <button type="submit" class="btn btn-primario btn-block btn-lg" id="btnCadastro">
+        Criar conta
+      </button>
+    </form>
+
+    <!-- ——— FORM ESQUECI SENHA ——— -->
+    <div id="formEsqueci" style="display:none">
+      <p style="color:var(--cor-texto-muted);font-size:var(--text-sm);margin-bottom:var(--space-4)">
+        Digite seu e-mail e enviaremos um link de recuperação.
+      </p>
+      <div class="form-group">
+        <input type="email" class="form-input" id="esqueciEmail" placeholder="seu@email.com">
+      </div>
+      <div id="esqueciMsg" style="display:none;padding:var(--space-3);background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:var(--radius-md);font-size:var(--text-sm);color:var(--cor-sucesso);margin-bottom:var(--space-4)"></div>
+      <button class="btn btn-primario btn-block" id="btnEnviarEsqueci">Enviar link</button>
+      <button class="btn btn-ghost btn-block mt-4" onclick="mudarAba('login')">← Voltar</button>
+    </div>
+
+  </div>
+</main>
+
+<script type="module">
+  import { CONFIG, aplicarTema } from '/js/config.js';
+  import { login, cadastrar, getUsuarioAtual } from '/js/supabase.js';
+
+  aplicarTema();
+
+  // Verificar se já está logado
+  const usuario = await getUsuarioAtual();
+  const params = new URLSearchParams(window.location.search);
+  const redirect = params.get('redirect') || '/';
+  if (usuario) window.location.href = redirect;
+
+  // Troca de abas
+  window.mudarAba = (aba) => {
+    const tabs = ['login', 'cadastro'];
+    tabs.forEach(t => {
+      const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+      const form = document.getElementById(`form${t.charAt(0).toUpperCase() + t.slice(1)}`);
+      const isAtivo = t === aba;
+      btn?.classList.toggle('ativo', isAtivo);
+      if (form) form.style.display = isAtivo ? 'block' : 'none';
+    });
+    if (aba !== 'login' && aba !== 'cadastro') {
+      document.getElementById('formLogin').style.display = 'none';
+      document.getElementById('formCadastro').style.display = 'none';
+      document.getElementById('formEsqueci').style.display = 'block';
+    }
+  };
+
+  // Toggle senhas
+  const toggleBtn = (btnId, inputId) => {
+    document.getElementById(btnId)?.addEventListener('click', () => {
+      const input = document.getElementById(inputId);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    });
+  };
+  toggleBtn('toggleSenhaLogin', 'loginSenha');
+  toggleBtn('toggleSenhaCad', 'cadSenha');
+
+  // Esqueci senha
+  document.getElementById('linkEsqueciSenha')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    mudarAba('esqueci');
+  });
+
+  // ——— LOGIN ———
+  document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnLogin');
+    const erroEl = document.getElementById('erroLogin');
+    erroEl.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="border-top-color:white;width:20px;height:20px"></div>';
+
+    try {
+      await login({
+        email: document.getElementById('loginEmail').value.trim(),
+        senha: document.getElementById('loginSenha').value,
+      });
+      window.location.href = redirect;
+    } catch (err) {
+      const msgs = {
+        'Invalid login credentials': 'E-mail ou senha incorretos.',
+        'Email not confirmed': 'Confirme seu e-mail antes de entrar.',
+      };
+      erroEl.textContent = msgs[err.message] || 'Erro ao entrar. Tente novamente.';
+      erroEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Entrar';
+    }
+  });
+
+  // ——— CADASTRO ———
+  document.getElementById('formCadastro')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnCadastro');
+    const erroEl = document.getElementById('erroCadastro');
+    erroEl.style.display = 'none';
+
+    if (!document.getElementById('aceitaTermos').checked) {
+      erroEl.textContent = 'Aceite os termos para continuar.';
+      erroEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="border-top-color:white;width:20px;height:20px"></div>';
+
+    try {
+      await cadastrar({
+        nome: document.getElementById('cadNome').value.trim(),
+        email: document.getElementById('cadEmail').value.trim(),
+        telefone: document.getElementById('cadTelefone').value.trim(),
+        senha: document.getElementById('cadSenha').value,
+      });
+      window.location.href = redirect;
+    } catch (err) {
+      const msgs = {
+        'User already registered': 'Este e-mail já está cadastrado.',
+        'Password should be at least 6 characters': 'A senha deve ter no mínimo 6 caracteres.',
+      };
+      erroEl.textContent = msgs[err.message] || 'Erro ao cadastrar. Tente novamente.';
+      erroEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Criar conta';
+    }
+  });
+
+  // ——— ESQUECI SENHA ———
+  document.getElementById('btnEnviarEsqueci')?.addEventListener('click', async () => {
+    const email = document.getElementById('esqueciEmail').value.trim();
+    const msg = document.getElementById('esqueciMsg');
+    if (!email) return;
+
+    const { getSupabase } = await import('/js/supabase.js');
+    const sb = getSupabase();
+    await sb.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/pages/resetar-senha.html` });
+    msg.textContent = `Link enviado para ${email}. Verifique sua caixa de entrada.`;
+    msg.style.display = 'block';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido Confirmado | BragShirt</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/global.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="header-logo"><span>BRAG</span><span>SHIRT</span></a>
+    </div>
+  </header>
+
+  <main style="padding:var(--space-16) 0;min-height:calc(100vh - var(--header-h))">
+    <div class="container" style="max-width:600px;text-align:center">
+      <div id="conteudo">
+        <div class="spinner spinner-lg" style="margin:0 auto;border-top-color:var(--cor-primaria)"></div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { aplicarTema, formatarMoeda, formatarData } from '/js/config.js';
+    import { limparCarrinho } from '/js/carrinho.js';
+    import { getSupabase } from '/js/supabase.js';
+
+    aplicarTema();
+
+    const params = new URLSearchParams(window.location.search);
+    const pedidoId = params.get('id');
+    const pendente = params.get('pendente') === 'true';
+    const el = document.getElementById('conteudo');
+
+    if (!pedidoId) { window.location.href = '/'; return; }
+
+    // Limpar carrinho após confirmação
+    limparCarrinho();
+
+    try {
+      const sb = getSupabase();
+      const { data: pedido } = await sb.from('pedidos').select('*').eq('id', pedidoId).single();
+
+      if (pendente) {
+        el.innerHTML = `
+          <div style="font-size:5rem;margin-bottom:var(--space-6)">⏳</div>
+          <h1 style="font-size:var(--text-4xl);margin-bottom:var(--space-4)">Pagamento Pendente</h1>
+          <p style="color:var(--cor-texto-muted);margin-bottom:var(--space-6)">Seu pedido <strong>#${pedidoId}</strong> foi criado e aguarda a confirmação do pagamento. Você receberá um e-mail assim que for aprovado.</p>
+          <div class="card" style="padding:var(--space-6);text-align:left;margin-bottom:var(--space-6)">
+            <div style="font-size:var(--text-sm);color:var(--cor-texto-muted);margin-bottom:var(--space-2)">Número do pedido</div>
+            <div style="font-size:var(--text-2xl);font-weight:700;color:var(--cor-secundaria)">#${pedidoId}</div>
+          </div>
+          <div style="display:flex;gap:var(--space-4);justify-content:center;flex-wrap:wrap">
+            <a href="/pages/minha-conta.html#pedidos" class="btn btn-primario">Ver meus pedidos</a>
+            <a href="/" class="btn btn-ghost">Voltar à loja</a>
+          </div>
+        `;
+      } else {
+        el.innerHTML = `
+          <div style="font-size:5rem;margin-bottom:var(--space-6);animation:fadeInUp 0.5s ease">🎉</div>
+          <h1 style="font-size:var(--text-4xl);margin-bottom:var(--space-4)">Pedido Confirmado!</h1>
+          <p style="color:var(--cor-texto-muted);margin-bottom:var(--space-6)">Recebemos seu pedido! Em breve você receberá um e-mail com os detalhes.</p>
+
+          <div class="card" style="padding:var(--space-6);text-align:left;margin-bottom:var(--space-6)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-3)">
+              <span style="color:var(--cor-texto-muted);font-size:var(--text-sm)">Número do pedido</span>
+              <span style="font-weight:700;color:var(--cor-secundaria)">#${pedidoId}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-3)">
+              <span style="color:var(--cor-texto-muted);font-size:var(--text-sm)">Status</span>
+              <span class="status-badge status-pago">🔵 Pago</span>
+            </div>
+            ${pedido ? `
+            <div style="display:flex;justify-content:space-between;margin-bottom:var(--space-3)">
+              <span style="color:var(--cor-texto-muted);font-size:var(--text-sm)">Total</span>
+              <span style="font-weight:700;font-size:var(--text-xl)">${formatarMoeda(pedido.total)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+              <span style="color:var(--cor-texto-muted);font-size:var(--text-sm)">Data</span>
+              <span style="font-size:var(--text-sm)">${formatarData(pedido.criado_em)}</span>
+            </div>
+            ` : ''}
+          </div>
+
+          <div style="background:rgba(0,156,59,0.1);border:1px solid rgba(0,156,59,0.3);border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-6);font-size:var(--text-sm)">
+            📧 Enviamos os detalhes para o seu e-mail. Acompanhe o rastreio pela sua conta.
+          </div>
+
+          <div style="display:flex;gap:var(--space-4);justify-content:center;flex-wrap:wrap">
+            <a href="/pages/minha-conta.html#pedidos" class="btn btn-primario btn-lg">Ver meus pedidos 📦</a>
+            <a href="/" class="btn btn-ghost">Continuar comprando</a>
+          </div>
+        `;
+      }
+    } catch(e) {
+      el.innerHTML = `
+        <div style="font-size:4rem;margin-bottom:var(--space-4)">✅</div>
+        <h1>Pedido Recebido!</h1>
+        <p style="color:var(--cor-texto-muted);margin:var(--space-4) 0">Pedido <strong>#${pedidoId}</strong> criado. Aguarde a confirmação do pagamento.</p>
+        <a href="/pages/minha-conta.html" class="btn btn-primario">Ver meus pedidos</a>
+      `;
+    }
+  </script>
+</body>
+</html>

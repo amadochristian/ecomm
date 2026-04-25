@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle">Produto | BragShirt</title>
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/global.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .produto-grid {
+      display: grid;
+      gap: var(--space-8);
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 768px) {
+      .produto-grid { grid-template-columns: 1fr 1fr; align-items: start; }
+    }
+    .galeria { position: sticky; top: calc(var(--header-h) + var(--space-4)); }
+    .img-principal {
+      aspect-ratio: 3/4;
+      background: var(--cor-superficie-2);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8rem;
+      margin-bottom: var(--space-4);
+      border: 1px solid var(--cor-borda);
+    }
+    .thumbs { display: flex; gap: var(--space-3); }
+    .thumb {
+      width: 72px;
+      height: 90px;
+      background: var(--cor-superficie-2);
+      border-radius: var(--radius-md);
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      transition: border-color var(--trans-fast);
+    }
+    .thumb.ativo { border-color: var(--cor-primaria); }
+
+    .variacao-grupo { margin-bottom: var(--space-6); }
+    .variacao-label { font-weight: 600; margin-bottom: var(--space-3); display: flex; justify-content: space-between; }
+    .variacao-opcoes { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .variacao-btn {
+      padding: var(--space-2) var(--space-4);
+      border: 2px solid var(--cor-borda);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: var(--text-sm);
+      transition: all var(--trans-fast);
+      background: transparent;
+      color: var(--cor-texto);
+    }
+    .variacao-btn:hover:not(:disabled) { border-color: var(--cor-primaria); }
+    .variacao-btn.selecionado { border-color: var(--cor-primaria); background: var(--cor-primaria); color: white; }
+    .variacao-btn:disabled { opacity: 0.35; cursor: not-allowed; text-decoration: line-through; }
+
+    .qty-selector {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      background: var(--cor-superficie-2);
+      border: 1px solid var(--cor-borda);
+      border-radius: var(--radius-md);
+      padding: var(--space-2);
+      width: fit-content;
+    }
+    .qty-selector button {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: var(--cor-superficie);
+      color: var(--cor-texto);
+      font-size: var(--text-lg);
+      transition: background var(--trans-fast);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .qty-selector button:hover { background: var(--cor-primaria); }
+    .qty-selector span { font-size: var(--text-xl); font-weight: 700; min-width: 2rem; text-align: center; }
+
+    .preco-destaque { font-size: var(--text-4xl); font-weight: 700; color: var(--cor-secundaria); }
+    .preco-parcelado { font-size: var(--text-sm); color: var(--cor-texto-muted); }
+    .preco-original { font-size: var(--text-xl); color: var(--cor-texto-muted); text-decoration: line-through; }
+    .badge-desconto {
+      display: inline-flex;
+      padding: 2px 10px;
+      background: rgba(239,68,68,0.15);
+      color: var(--cor-erro);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      margin-left: var(--space-3);
+    }
+
+    .accordion-item {
+      border-bottom: 1px solid var(--cor-borda);
+    }
+    .accordion-header {
+      padding: var(--space-4) 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .accordion-body {
+      padding-bottom: var(--space-4);
+      color: var(--cor-texto-muted);
+      font-size: var(--text-sm);
+      line-height: 1.8;
+      display: none;
+    }
+    .accordion-body.aberto { display: block; }
+  </style>
+</head>
+<body>
+
+  <!-- Header simplificado -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="header-logo"><span>BRAG</span><span>SHIRT</span></a>
+      <nav class="header-nav">
+        <a href="/">Início</a>
+        <a href="/pages/produtos.html">Camisetas</a>
+      </nav>
+      <div class="header-acoes">
+        <button class="btn-icone" id="btnAbrirCarrinho">🛒
+          <span class="carrinho-contador" id="contadorCarrinho">0</span>
+        </button>
+        <div id="headerUsuario"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Carrinho Drawer -->
+  <div class="carrinho-overlay" id="carrinhoOverlay"></div>
+  <div class="carrinho-drawer" id="carrinhoDrawer">
+    <div class="carrinho-drawer-header">
+      <h3>🛒 Seu Carrinho</h3>
+      <button class="btn-icone" id="btnFecharCarrinho">✕</button>
+    </div>
+    <div class="carrinho-drawer-body" id="miniCarrinhoConteudo"></div>
+  </div>
+
+  <main style="padding:var(--space-8) 0 var(--space-16)">
+    <div class="container">
+
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        <a href="/">Início</a>
+        <span class="breadcrumb-sep">›</span>
+        <a href="/pages/produtos.html">Camisetas</a>
+        <span class="breadcrumb-sep">›</span>
+        <span id="breadcrumbNome">Carregando...</span>
+      </nav>
+
+      <!-- Loading state -->
+      <div id="loadingProduto" class="produto-grid">
+        <div class="skeleton" style="aspect-ratio:3/4;border-radius:var(--radius-lg)"></div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+          <div class="skeleton" style="height:40px;border-radius:var(--radius-md);width:80%"></div>
+          <div class="skeleton" style="height:60px;border-radius:var(--radius-md)"></div>
+          <div class="skeleton" style="height:120px;border-radius:var(--radius-md)"></div>
+        </div>
+      </div>
+
+      <!-- Produto carregado -->
+      <div id="produtoConteudo" style="display:none" class="produto-grid">
+
+        <!-- GALERIA -->
+        <div class="galeria">
+          <div class="img-principal" id="imgPrincipal">👕</div>
+          <div class="thumbs" id="thumbsGaleria"></div>
+        </div>
+
+        <!-- INFO -->
+        <div>
+          <!-- Badges -->
+          <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-bottom:var(--space-3)" id="badgesArea"></div>
+
+          <h1 id="produtoNome" style="font-size:clamp(1.5rem,3vw,2.5rem);margin-bottom:var(--space-4)"></h1>
+
+          <!-- Preços -->
+          <div style="margin-bottom:var(--space-6)">
+            <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+              <span class="preco-destaque" id="produtoPreco"></span>
+              <span class="preco-original" id="produtoPrecoAntigo" style="display:none"></span>
+              <span class="badge-desconto" id="produtoDesconto" style="display:none"></span>
+            </div>
+            <p class="preco-parcelado" id="produtoParcelas"></p>
+          </div>
+
+          <!-- Variação: Tamanho -->
+          <div class="variacao-grupo">
+            <div class="variacao-label">
+              <span>Tamanho: <strong id="tamanhoSelecionado">—</strong></span>
+              <a href="#guia-tamanhos" style="font-size:var(--text-xs);color:var(--cor-primaria)">Guia de tamanhos</a>
+            </div>
+            <div class="variacao-opcoes" id="opcoesTamanhos"></div>
+          </div>
+
+          <!-- Variação: Modelo -->
+          <div class="variacao-grupo" id="grupoModelo">
+            <div class="variacao-label">
+              Modelo: <strong id="modeloSelecionado">—</strong>
+            </div>
+            <div class="variacao-opcoes" id="opcoesModelos"></div>
+          </div>
+
+          <!-- Quantidade -->
+          <div class="variacao-grupo">
+            <div class="variacao-label">Quantidade</div>
+            <div class="qty-selector">
+              <button id="btnMenos">−</button>
+              <span id="quantidade">1</span>
+              <button id="btnMais">+</button>
+            </div>
+          </div>
+
+          <!-- Estoque -->
+          <div id="estoqueAviso" style="font-size:var(--text-sm);margin-bottom:var(--space-4)"></div>
+
+          <!-- CTAs -->
+          <div style="display:flex;flex-direction:column;gap:var(--space-3)">
+            <button class="btn btn-acento btn-lg btn-block" id="btnComprar">
+              🛒 Adicionar ao Carrinho
+            </button>
+            <button class="btn btn-secundario btn-block" id="btnComprarAgora">
+              ⚡ Comprar Agora
+            </button>
+          </div>
+
+          <!-- Benefícios -->
+          <div style="margin-top:var(--space-6);display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)">
+            <div style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--cor-texto-muted)">
+              🚚 Frete grátis acima de R$299
+            </div>
+            <div style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--cor-texto-muted)">
+              🔒 Compra 100% segura
+            </div>
+            <div style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--cor-texto-muted)">
+              ↩️ Troca em até 30 dias
+            </div>
+            <div style="display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--cor-texto-muted)">
+              ⭐ Qualidade premium
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Acordeão de detalhes -->
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAcordeon(this)">
+              Descrição do produto
+              <span>▼</span>
+            </div>
+            <div class="accordion-body" id="produtoDescricao"></div>
+          </div>
+
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAcordeon(this)">
+              Composição e cuidados
+              <span>▼</span>
+            </div>
+            <div class="accordion-body">
+              <p>• Torcedor: 100% Poliéster</p>
+              <p>• Jogador: 92% Poliéster + 8% Elastano</p>
+              <p>• Retrô: 100% Algodão</p>
+              <br>
+              <p>Lavar à mão ou na máquina em modo delicado (30°C). Não usar alvejante. Secar à sombra.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item" id="guia-tamanhos">
+            <div class="accordion-header" onclick="toggleAcordeon(this)">
+              Guia de tamanhos
+              <span>▼</span>
+            </div>
+            <div class="accordion-body">
+              <table style="width:100%;border-collapse:collapse;font-size:var(--text-sm)">
+                <thead>
+                  <tr style="border-bottom:1px solid var(--cor-borda)">
+                    <th style="padding:var(--space-2);text-align:left">Tamanho</th>
+                    <th style="padding:var(--space-2)">Peito (cm)</th>
+                    <th style="padding:var(--space-2)">Comprimento (cm)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td style="padding:var(--space-2)">PP</td><td style="text-align:center;padding:var(--space-2)">88-92</td><td style="text-align:center;padding:var(--space-2)">65</td></tr>
+                  <tr><td style="padding:var(--space-2)">P</td><td style="text-align:center;padding:var(--space-2)">92-96</td><td style="text-align:center;padding:var(--space-2)">68</td></tr>
+                  <tr><td style="padding:var(--space-2)">M</td><td style="text-align:center;padding:var(--space-2)">96-100</td><td style="text-align:center;padding:var(--space-2)">71</td></tr>
+                  <tr><td style="padding:var(--space-2)">G</td><td style="text-align:center;padding:var(--space-2)">100-104</td><td style="text-align:center;padding:var(--space-2)">74</td></tr>
+                  <tr><td style="padding:var(--space-2)">GG</td><td style="text-align:center;padding:var(--space-2)">104-110</td><td style="text-align:center;padding:var(--space-2)">77</td></tr>
+                  <tr><td style="padding:var(--space-2)">XGG</td><td style="text-align:center;padding:var(--space-2)">110-118</td><td style="text-align:center;padding:var(--space-2)">80</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ERRO -->
+      <div id="erroProduto" style="display:none;text-align:center;padding:var(--space-16)">
+        <div style="font-size:4rem;margin-bottom:var(--space-4)">😕</div>
+        <h2>Produto não encontrado</h2>
+        <p style="color:var(--cor-texto-muted);margin-bottom:var(--space-6)">Este produto não existe ou foi removido.</p>
+        <a href="/pages/produtos.html" class="btn btn-primario">Ver todos os produtos</a>
+      </div>
+
+    </div>
+  </main>
+
+  <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp-float">💬</a>
+
+  <script type="module">
+    import { CONFIG, aplicarTema, formatarMoeda } from '/js/config.js';
+    import { PRODUTOS_MOCK } from '/js/produtos.js';
+    import { adicionarAoCarrinho, atualizarContadorHeader, renderizarMiniCarrinho } from '/js/carrinho.js';
+    import { getUsuarioAtual } from '/js/supabase.js';
+
+    aplicarTema();
+
+    // ——— CARRINHO DRAWER ———
+    const overlay = document.getElementById('carrinhoOverlay');
+    const drawer = document.getElementById('carrinhoDrawer');
+    const miniConteudo = document.getElementById('miniCarrinhoConteudo');
+    document.getElementById('btnAbrirCarrinho')?.addEventListener('click', () => {
+      renderizarMiniCarrinho(miniConteudo);
+      overlay.classList.add('aberto');
+      drawer.classList.add('aberto');
+    });
+    document.getElementById('btnFecharCarrinho')?.addEventListener('click', () => {
+      overlay.classList.remove('aberto');
+      drawer.classList.remove('aberto');
+    });
+    overlay?.addEventListener('click', () => { overlay.classList.remove('aberto'); drawer.classList.remove('aberto'); });
+
+    atualizarContadorHeader();
+
+    // ——— HEADER USUÁRIO ———
+    const usuario = await getUsuarioAtual();
+    const headerEl = document.getElementById('headerUsuario');
+    if (usuario) {
+      headerEl.innerHTML = `<a href="/pages/minha-conta.html" class="btn btn-sm btn-ghost">👤 ${usuario.perfil?.nome || usuario.email.split('@')[0]}</a>`;
+    } else {
+      headerEl.innerHTML = `<a href="/pages/login.html" class="btn btn-sm btn-ghost">Entrar</a>`;
+    }
+
+    // ——— CARREGAR PRODUTO ———
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+
+    // Em produção: buscar do Supabase via getProdutoPorSlug(slug)
+    const produto = PRODUTOS_MOCK.find(p => p.slug === slug);
+
+    if (!produto) {
+      document.getElementById('loadingProduto').style.display = 'none';
+      document.getElementById('erroProduto').style.display = 'block';
+    } else {
+      // Preencher SEO
+      document.getElementById('pageTitle').textContent = `${produto.nome} | BragShirt`;
+      document.getElementById('breadcrumbNome').textContent = produto.nome;
+
+      // Preencher UI
+      document.getElementById('produtoNome').textContent = produto.nome;
+      document.getElementById('produtoDescricao').innerHTML = produto.descricao;
+
+      const preco = produto.preco;
+      const precoAnt = produto.preco_antigo;
+      document.getElementById('produtoPreco').textContent = formatarMoeda(preco);
+      document.getElementById('produtoParcelas').textContent = `ou 12x de ${formatarMoeda(preco / 12)} sem juros`;
+
+      if (precoAnt) {
+        document.getElementById('produtoPrecoAntigo').textContent = formatarMoeda(precoAnt);
+        document.getElementById('produtoPrecoAntigo').style.display = 'inline';
+        const pct = Math.round((1 - preco / precoAnt) * 100);
+        document.getElementById('produtoDesconto').textContent = `-${pct}%`;
+        document.getElementById('produtoDesconto').style.display = 'inline-flex';
+      }
+
+      // Badges
+      const badges = document.getElementById('badgesArea');
+      if (produto.destaque) badges.innerHTML += '<span class="badge badge-destaque">⭐ Destaque</span>';
+      produto.tags?.forEach(tag => {
+        badges.innerHTML += `<span style="font-size:var(--text-xs);padding:2px 10px;background:rgba(13,71,161,0.15);color:var(--cor-primaria);border-radius:var(--radius-full);border:1px solid rgba(13,71,161,0.3)">${tag}</span>`;
+      });
+
+      // Thumbs (simulação)
+      const thumbsEl = document.getElementById('thumbsGaleria');
+      for (let i = 0; i < Math.min(produto.imagens?.length || 1, 3); i++) {
+        thumbsEl.innerHTML += `<div class="thumb ${i === 0 ? 'ativo' : ''}" onclick="selecionarThumb(this)">👕</div>`;
+      }
+
+      // Estado de seleção
+      let tamanhoSel = null;
+      let modeloSel = null;
+      let quantidade = 1;
+
+      // Variações: Tamanho
+      const tamEl = document.getElementById('opcoesTamanhos');
+      produto.tamanhos.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = 'variacao-btn';
+        btn.textContent = t;
+        btn.addEventListener('click', () => {
+          tamEl.querySelectorAll('.variacao-btn').forEach(b => b.classList.remove('selecionado'));
+          btn.classList.add('selecionado');
+          tamanhoSel = t;
+          document.getElementById('tamanhoSelecionado').textContent = t;
+          atualizarEstoque();
+        });
+        tamEl.appendChild(btn);
+      });
+
+      // Variações: Modelo
+      const modEl = document.getElementById('opcoesModelos');
+      if (produto.modelos?.length <= 1) {
+        document.getElementById('grupoModelo').style.display = 'none';
+        modeloSel = produto.modelos[0];
+      } else {
+        produto.modelos?.forEach(m => {
+          const btn = document.createElement('button');
+          btn.className = 'variacao-btn';
+          btn.textContent = m;
+          btn.addEventListener('click', () => {
+            modEl.querySelectorAll('.variacao-btn').forEach(b => b.classList.remove('selecionado'));
+            btn.classList.add('selecionado');
+            modeloSel = m;
+            document.getElementById('modeloSelecionado').textContent = m;
+            atualizarEstoque();
+          });
+          modEl.appendChild(btn);
+        });
+      }
+
+      function atualizarEstoque() {
+        if (!tamanhoSel || !modeloSel) return;
+        const chave = `${tamanhoSel}_${modeloSel}`;
+        const estoque = produto.estoque?.[chave] ?? 0;
+        const el = document.getElementById('estoqueAviso');
+        if (estoque === 0) {
+          el.innerHTML = '<span style="color:var(--cor-erro)">⚠️ Sem estoque para esta combinação</span>';
+          document.getElementById('btnComprar').disabled = true;
+          document.getElementById('btnComprarAgora').disabled = true;
+        } else if (estoque <= 3) {
+          el.innerHTML = `<span style="color:var(--cor-aviso)">⚡ Últimas ${estoque} unidades!</span>`;
+          document.getElementById('btnComprar').disabled = false;
+          document.getElementById('btnComprarAgora').disabled = false;
+        } else {
+          el.innerHTML = `<span style="color:var(--cor-acento)">✅ Em estoque (${estoque} disponíveis)</span>`;
+          document.getElementById('btnComprar').disabled = false;
+          document.getElementById('btnComprarAgora').disabled = false;
+        }
+      }
+
+      // Controles de quantidade
+      document.getElementById('btnMenos').addEventListener('click', () => {
+        if (quantidade > 1) { quantidade--; document.getElementById('quantidade').textContent = quantidade; }
+      });
+      document.getElementById('btnMais').addEventListener('click', () => {
+        quantidade++;
+        document.getElementById('quantidade').textContent = quantidade;
+      });
+
+      // Adicionar ao carrinho
+      document.getElementById('btnComprar').addEventListener('click', () => {
+        if (!tamanhoSel) { alert('Selecione um tamanho'); return; }
+        if (!modeloSel) { alert('Selecione um modelo'); return; }
+        adicionarAoCarrinho({
+          id: produto.id,
+          slug: produto.slug,
+          nome: produto.nome,
+          preco: produto.preco,
+          imagem: '/assets/placeholder.jpg',
+          tamanho: tamanhoSel,
+          modelo: modeloSel,
+          quantidade,
+          peso: produto.peso,
+        });
+        // Abre drawer do carrinho
+        renderizarMiniCarrinho(miniConteudo);
+        overlay.classList.add('aberto');
+        drawer.classList.add('aberto');
+      });
+
+      // Comprar agora
+      document.getElementById('btnComprarAgora').addEventListener('click', async () => {
+        if (!tamanhoSel) { alert('Selecione um tamanho'); return; }
+        if (!modeloSel) { alert('Selecione um modelo'); return; }
+
+        // Verificar login
+        if (!usuario) {
+          window.location.href = `/pages/login.html?redirect=${encodeURIComponent(window.location.href)}`;
+          return;
+        }
+
+        adicionarAoCarrinho({
+          id: produto.id, slug: produto.slug, nome: produto.nome,
+          preco: produto.preco, imagem: '/assets/placeholder.jpg',
+          tamanho: tamanhoSel, modelo: modeloSel, quantidade, peso: produto.peso,
+        });
+        window.location.href = '/pages/checkout.html';
+      });
+
+      document.getElementById('loadingProduto').style.display = 'none';
+      document.getElementById('produtoConteudo').style.display = 'grid';
+    }
+
+    // Acordeão
+    window.toggleAcordeon = (header) => {
+      const body = header.nextElementSibling;
+      const arrow = header.querySelector('span');
+      body.classList.toggle('aberto');
+      arrow.textContent = body.classList.contains('aberto') ? '▲' : '▼';
+    };
+
+    // Galeria
+    window.selecionarThumb = (thumb) => {
+      document.querySelectorAll('.thumb').forEach(t => t.classList.remove('ativo'));
+      thumb.classList.add('ativo');
+    };
+  </script>
+</body>
+</html>

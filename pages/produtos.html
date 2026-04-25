@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camisetas | BragShirt</title>
+  <meta name="description" content="Todas as camisetas da Seleção Brasileira. Modelos oficiais, retrô e infantil.">
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/global.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .filtros-bar {
+      display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center;
+      padding: var(--space-4) 0; border-bottom: 1px solid var(--cor-borda); margin-bottom: var(--space-8);
+    }
+    .filtro-chip {
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--cor-borda);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--cor-texto-muted);
+      cursor: pointer;
+      transition: all var(--trans-fast);
+      background: transparent;
+    }
+    .filtro-chip:hover { border-color: var(--cor-primaria); color: var(--cor-texto); }
+    .filtro-chip.ativo { background: var(--cor-primaria); border-color: var(--cor-primaria); color: white; }
+    .sort-select { margin-left: auto; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="header-logo"><span>BRAG</span><span>SHIRT</span></a>
+      <nav class="header-nav">
+        <a href="/">Início</a>
+        <a href="/pages/produtos.html" style="color:var(--cor-secundaria)">Camisetas</a>
+      </nav>
+      <div class="header-acoes">
+        <button class="btn-icone" id="btnAbrirCarrinho">🛒<span class="carrinho-contador" id="contadorCarrinho">0</span></button>
+        <div id="headerUsuario"></div>
+        <button class="btn-menu-mobile btn-icone" id="btnMenuMobile">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="carrinho-overlay" id="carrinhoOverlay"></div>
+  <div class="carrinho-drawer" id="carrinhoDrawer">
+    <div class="carrinho-drawer-header">
+      <h3>🛒 Carrinho</h3>
+      <button class="btn-icone" id="btnFecharCarrinho">✕</button>
+    </div>
+    <div class="carrinho-drawer-body" id="miniCarrinhoConteudo"></div>
+  </div>
+
+  <main style="padding:var(--space-8) 0 var(--space-16)">
+    <div class="container">
+
+      <nav class="breadcrumb">
+        <a href="/">Início</a>
+        <span class="breadcrumb-sep">›</span>
+        <span>Camisetas</span>
+      </nav>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-6)">
+        <h1 style="font-size:clamp(1.5rem,4vw,3rem)">👕 Todas as Camisetas</h1>
+        <span id="countProdutos" style="color:var(--cor-texto-muted);font-size:var(--text-sm)"></span>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros-bar">
+        <button class="filtro-chip ativo" data-cat="">Todas</button>
+        <button class="filtro-chip" data-cat="selecao">🇧🇷 Seleção</button>
+        <button class="filtro-chip" data-cat="retro">🏆 Retrô</button>
+        <button class="filtro-chip" data-cat="infantil">👦 Infantil</button>
+
+        <select class="form-input form-select sort-select" id="ordenar" style="max-width:180px;padding:0.5rem 2rem 0.5rem 0.75rem;font-size:var(--text-sm)">
+          <option value="">Ordenar por</option>
+          <option value="preco-asc">Menor preço</option>
+          <option value="preco-desc">Maior preço</option>
+          <option value="destaque">Destaques</option>
+        </select>
+      </div>
+
+      <!-- Grid de produtos -->
+      <div class="grid-4" id="gridProdutos"></div>
+
+      <!-- Vazio -->
+      <div id="semProdutos" style="display:none;text-align:center;padding:var(--space-16)">
+        <div style="font-size:4rem;margin-bottom:var(--space-4)">😕</div>
+        <h3>Nenhum produto encontrado</h3>
+        <p style="color:var(--cor-texto-muted)">Tente outra categoria</p>
+      </div>
+
+    </div>
+  </main>
+
+  <a href="https://wa.me/5511999999999" target="_blank" class="btn-whatsapp-float">💬</a>
+
+  <script type="module">
+    import { aplicarTema, formatarMoeda } from '/js/config.js';
+    import { PRODUTOS_MOCK } from '/js/produtos.js';
+    import { atualizarContadorHeader, renderizarMiniCarrinho } from '/js/carrinho.js';
+    import { getUsuarioAtual } from '/js/supabase.js';
+
+    aplicarTema();
+    atualizarContadorHeader();
+
+    // Header usuário
+    const usuario = await getUsuarioAtual();
+    const headerEl = document.getElementById('headerUsuario');
+    headerEl.innerHTML = usuario
+      ? `<a href="/pages/minha-conta.html" class="btn btn-sm btn-ghost">👤 ${usuario.perfil?.nome || usuario.email.split('@')[0]}</a>`
+      : `<a href="/pages/login.html" class="btn btn-sm btn-ghost">Entrar</a>`;
+
+    // Carrinho drawer
+    const overlay = document.getElementById('carrinhoOverlay');
+    const drawer = document.getElementById('carrinhoDrawer');
+    const mini = document.getElementById('miniCarrinhoConteudo');
+    document.getElementById('btnAbrirCarrinho')?.addEventListener('click', () => { renderizarMiniCarrinho(mini); overlay.classList.add('aberto'); drawer.classList.add('aberto'); });
+    document.getElementById('btnFecharCarrinho')?.addEventListener('click', () => { overlay.classList.remove('aberto'); drawer.classList.remove('aberto'); });
+    overlay?.addEventListener('click', () => { overlay.classList.remove('aberto'); drawer.classList.remove('aberto'); });
+
+    let categoriaAtual = '';
+    let ordenacao = '';
+
+    // Ler parâmetro da URL
+    const params = new URLSearchParams(window.location.search);
+    const catParam = params.get('categoria');
+    if (catParam) {
+      categoriaAtual = catParam;
+      document.querySelectorAll('.filtro-chip').forEach(b => { b.classList.toggle('ativo', b.dataset.cat === catParam); });
+    }
+
+    function renderizarProdutos() {
+      let lista = PRODUTOS_MOCK.filter(p => p.ativo);
+      if (categoriaAtual) lista = lista.filter(p => p.categoria === categoriaAtual);
+      if (ordenacao === 'preco-asc') lista.sort((a,b) => a.preco - b.preco);
+      else if (ordenacao === 'preco-desc') lista.sort((a,b) => b.preco - a.preco);
+      else if (ordenacao === 'destaque') lista.sort((a,b) => (b.destaque?1:0) - (a.destaque?1:0));
+
+      const grid = document.getElementById('gridProdutos');
+      const semProd = document.getElementById('semProdutos');
+      document.getElementById('countProdutos').textContent = `${lista.length} produto${lista.length !== 1 ? 's' : ''}`;
+
+      if (!lista.length) { grid.innerHTML = ''; semProd.style.display = 'block'; return; }
+      semProd.style.display = 'none';
+
+      grid.innerHTML = lista.map(produto => {
+        const pct = produto.preco_antigo ? Math.round((1 - produto.preco / produto.preco_antigo) * 100) : 0;
+        return `
+          <a href="/pages/produto.html?slug=${produto.slug}" class="card card-produto">
+            <div class="imagem-wrapper">
+              <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--cor-superficie-2),var(--cor-superficie));display:flex;align-items:center;justify-content:center;font-size:5rem">👕</div>
+              ${produto.destaque ? '<span class="badge badge-destaque">⭐ Destaque</span>' : ''}
+              ${pct > 0 ? `<span class="badge badge-oferta" style="top:var(--space-3);right:var(--space-3);left:auto">-${pct}%</span>` : ''}
+            </div>
+            <div class="info">
+              <div class="nome">${produto.nome}</div>
+              <div style="display:flex;gap:var(--space-1);flex-wrap:wrap;margin-bottom:var(--space-2)">
+                ${produto.tamanhos.slice(0,5).map(t => `<span style="font-size:10px;padding:1px 6px;background:var(--cor-superficie-2);border-radius:var(--radius-sm);border:1px solid var(--cor-borda)">${t}</span>`).join('')}
+              </div>
+              <div class="precos">
+                <span class="preco-atual">${formatarMoeda(produto.preco)}</span>
+                ${produto.preco_antigo ? `<span class="preco-antigo">${formatarMoeda(produto.preco_antigo)}</span>` : ''}
+              </div>
+              <div style="font-size:var(--text-xs);color:var(--cor-texto-muted);margin-top:var(--space-2)">12x de ${formatarMoeda(produto.preco/12)}</div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    // Filtros
+    document.querySelectorAll('.filtro-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filtro-chip').forEach(b => b.classList.remove('ativo'));
+        btn.classList.add('ativo');
+        categoriaAtual = btn.dataset.cat;
+        renderizarProdutos();
+      });
+    });
+
+    document.getElementById('ordenar')?.addEventListener('change', (e) => {
+      ordenacao = e.target.value;
+      renderizarProdutos();
+    });
+
+    renderizarProdutos();
+  </script>
+</body>
+</html>
