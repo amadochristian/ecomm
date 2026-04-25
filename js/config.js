@@ -24,24 +24,24 @@ export const CONFIG = {
   ogImage: "/assets/og-image.jpg",
 
   // 📞 CONTATO — ALTERAR AQUI
-  whatsapp: "5511999999999",
+  whatsapp: "5511945373456",
   whatsappTextoDefault: "Olá! Vim pelo site e gostaria de mais informações.",
-  email: "contato@bragshirt.com",
-  emailSuporte: "suporte@bragshirt.com",
+  email: "christian.amado97@gmail.com",
+  emailSuporte: "christian.amado97@gmail.com",
 
   // 📍 ENDEREÇO — ALTERAR AQUI
-  endereco: "Rua das Camisetas, 123 - Bragança Paulista, SP",
+  endereco: "Pires Pimentel 2000 - Bragança Paulista, SP",
   cep: "12900-000",
   cidade: "Bragança Paulista",
   estado: "SP",
 
   // 🌐 URLs — ALTERAR AQUI
-  urlSite: "https://bragshirt.com.br",
+  urlSite: "https://ecomm-six-tan.vercel.app/",
   urlAdmin: "/admin",
 
   // 💳 MERCADO PAGO — ALTERAR AQUI
-  mercadoPagoPublicKey: "TEST-xxxx-xxxx-xxxx-xxxx", // ⚠️ ALTERAR PARA CHAVE DE PRODUÇÃO
-  mercadoPagoAcessToken: "TEST-xxxx",               // ⚠️ ALTERAR NO BACKEND (.env)
+  mercadoPagoPublicKey: "TEST-31e4e280-e2fd-491a-a6ea-21e0b037fdc0", // ⚠️ ALTERAR PARA CHAVE DE PRODUÇÃO
+  mercadoPagoAcessToken: "//",               // ⚠️ ALTERAR NO BACKEND (.env)
 
   // 🚚 MELHOR ENVIO — ALTERAR AQUI
   melhorEnvioToken: "xxxx",   // ⚠️ ALTERAR NO BACKEND (.env)
@@ -52,13 +52,12 @@ export const CONFIG = {
   resendFrom: "BragShirt <noreply@bragshirt.com>",
 
   // 🗄️ SUPABASE — ALTERAR AQUI
-  supabaseUrl: "https://xxxx.supabase.co",          // ⚠️ ALTERAR AQUI
-  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxxx", // ⚠️ ALTERAR AQUI
+  supabaseUrl: "https://emtbkpwdhzjvewokujie.supabase.co",          // ⚠️ ALTERAR AQUI
+  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtdGJrcHdkaHpqdmV3b2t1amllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5ODEwNzIsImV4cCI6MjA5MjU1NzA3Mn0.RgF9-ZC8tudyX6bMKsnKBesNw5R-BX0hG0NIFl6kuSE", // ⚠️ ALTERAR AQUI
 
   // 🔐 ADMINS — ALTERAR AQUI
   adminEmails: [
-    "admin@bragshirt.com",    // ⚠️ ALTERAR AQUI
-    "seu@email.com",          // ⚠️ ALTERAR AQUI
+    "christian.amado97@gmail.com",    // ⚠️ ALTERAR AQUI
   ],
 
   // 🛒 CONFIGURAÇÕES DA LOJA
