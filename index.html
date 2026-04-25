@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- 🔍 SEO — ALTERAR AQUI -->
+  <title>BragShirt — Camisetas da Seleção Brasileira | Copa 2026</title>
+  <meta name="description" content="Camisetas oficiais e retrô da Seleção Brasileira. Qualidade premium para o torcedor apaixonado. Frete grátis acima de R$299.">
+  <meta name="keywords" content="camiseta seleção brasileira, camisa copa 2026, camiseta retrô brasil, camisa canarinho">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://bragshirt.com.br">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bragshirt.com.br">
+  <meta property="og:title" content="BragShirt — Veste a Garra, Vive a Copa">
+  <meta property="og:description" content="Camisetas da Seleção Brasileira com qualidade premium. Para quem vive o futebol.">
+  <meta property="og:image" content="/assets/og-image.jpg">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BragShirt — Veste a Garra, Vive a Copa">
+
+  <link rel="icon" href="/assets/favicon.ico">
+  <link rel="stylesheet" href="/css/global.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "BragShirt",
+    "description": "Camisetas da Seleção Brasileira",
+    "url": "https://bragshirt.com.br",
+    "telephone": "+5511999999999",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Rua das Camisetas, 123",
+      "addressLocality": "Bragança Paulista",
+      "addressRegion": "SP",
+      "postalCode": "12900-000",
+      "addressCountry": "BR"
+    }
+  }
+  </script>
+</head>
+<body>
+
+  <!-- ============================================================ -->
+  <!-- 📌 HEADER -->
+  <!-- ============================================================ -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="header-logo">
+        <span>BRAG</span><span>SHIRT</span>
+      </a>
+
+      <nav class="header-nav">
+        <a href="/">Início</a>
+        <a href="/pages/produtos.html">Camisetas</a>
+        <a href="/pages/sobre.html">Sobre</a>
+        <a href="/pages/contato.html">Contato</a>
+      </nav>
+
+      <div class="header-acoes">
+        <a href="/pages/busca.html" class="btn-icone" aria-label="Buscar">🔍</a>
+
+        <!-- Ícone carrinho com contador -->
+        <button class="btn-icone" id="btnAbrirCarrinho" aria-label="Carrinho">
+          🛒
+          <span class="carrinho-contador" id="contadorCarrinho">0</span>
+        </button>
+
+        <!-- Conta do usuário (muda conforme login) -->
+        <div id="headerUsuario">
+          <a href="/pages/login.html" class="btn btn-sm btn-ghost" id="btnLogin">Entrar</a>
+        </div>
+
+        <!-- Menu mobile -->
+        <button class="btn-menu-mobile btn-icone" id="btnMenuMobile" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Menu Mobile Drawer -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+  <div class="menu-drawer" id="menuDrawer">
+    <div class="flex justify-between items-center">
+      <span class="header-logo"><span>BRAG</span><span>SHIRT</span></span>
+      <button class="btn-icone" id="btnFecharMenu">✕</button>
+    </div>
+    <nav>
+      <a href="/">🏠 Início</a>
+      <a href="/pages/produtos.html">👕 Camisetas</a>
+      <a href="/pages/sobre.html">ℹ️ Sobre</a>
+      <a href="/pages/contato.html">📞 Contato</a>
+      <a href="/pages/minha-conta.html">👤 Minha Conta</a>
+      <a href="/pages/carrinho.html">🛒 Carrinho</a>
+    </nav>
+  </div>
+
+  <!-- Carrinho Lateral Drawer -->
+  <div class="carrinho-overlay" id="carrinhoOverlay"></div>
+  <div class="carrinho-drawer" id="carrinhoDrawer">
+    <div class="carrinho-drawer-header">
+      <h3>🛒 Seu Carrinho</h3>
+      <button class="btn-icone" id="btnFecharCarrinho">✕</button>
+    </div>
+    <div class="carrinho-drawer-body" id="miniCarrinhoConteudo"></div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ============================================================ -->
+  <!-- 🦸 HERO SECTION -->
+  <!-- ============================================================ -->
+  <main>
+    <section class="hero">
+      <div class="hero-bg"></div>
+
+      <!-- Partículas decorativas -->
+      <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
+        <div style="position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(255,223,0,0.04) 0%,transparent 70%);top:-200px;right:-100px;border-radius:50%"></div>
+        <div style="position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(0,156,59,0.06) 0%,transparent 70%);bottom:-100px;left:-50px;border-radius:50%"></div>
+      </div>
+
+      <div class="container hero-content">
+        <div class="hero-tag">⚽ Copa do Mundo 2026</div>
+        <h1>
+          <span class="linha-1">VESTE A</span>
+          <span class="linha-2">GARRA,</span>
+          <span class="linha-3">VIVE A COPA.</span>
+        </h1>
+        <p>Camisetas da Seleção Brasileira com qualidade premium. Para quem vive o futebol de verdade.</p>
+        <div class="hero-acoes">
+          <a href="/pages/produtos.html" class="btn btn-acento btn-lg">
+            Ver Coleção ⚡
+          </a>
+          <a href="#destaques" class="btn btn-ghost btn-lg">
+            Ver Destaques
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 📊 FAIXA DE BENEFÍCIOS -->
+    <!-- ============================================================ -->
+    <div style="background:var(--cor-primaria);padding:var(--space-4) 0;overflow:hidden">
+      <div class="container">
+        <div style="display:flex;gap:var(--space-8);flex-wrap:wrap;justify-content:center;text-align:center">
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <span style="font-size:1.5rem">🚚</span>
+            <div>
+              <div style="font-weight:700;font-size:var(--text-sm)">Frete Grátis</div>
+              <div style="font-size:var(--text-xs);opacity:0.8">Acima de R$299</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <span style="font-size:1.5rem">🔒</span>
+            <div>
+              <div style="font-weight:700;font-size:var(--text-sm)">Pagamento Seguro</div>
+              <div style="font-size:var(--text-xs);opacity:0.8">Mercado Pago</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <span style="font-size:1.5rem">↩️</span>
+            <div>
+              <div style="font-weight:700;font-size:var(--text-sm)">Troca Fácil</div>
+              <div style="font-size:var(--text-xs);opacity:0.8">30 dias</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--space-2)">
+            <span style="font-size:1.5rem">⭐</span>
+            <div>
+              <div style="font-weight:700;font-size:var(--text-sm)">Qualidade Premium</div>
+              <div style="font-size:var(--text-xs);opacity:0.8">Garantida</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 🌟 DESTAQUES -->
+    <!-- ============================================================ -->
+    <section class="secao" id="destaques">
+      <div class="container">
+        <div class="secao-titulo-linha">
+          <h2>✨ DESTAQUES</h2>
+        </div>
+
+        <div class="grid-4" id="gridDestaques">
+          <!-- Preenchido via JS -->
+          <div class="card skeleton" style="height:360px"></div>
+          <div class="card skeleton" style="height:360px"></div>
+          <div class="card skeleton" style="height:360px"></div>
+          <div class="card skeleton" style="height:360px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 🗂️ CATEGORIAS -->
+    <!-- ============================================================ -->
+    <section class="secao" style="background:var(--cor-superficie)">
+      <div class="container">
+        <div class="secao-header">
+          <h2>Explore por <span style="color:var(--cor-secundaria)">Categoria</span></h2>
+          <p>Encontre a camisa perfeita para você</p>
+        </div>
+
+        <div class="grid-3" style="gap:var(--space-6)">
+          <a href="/pages/produtos.html?categoria=selecao" class="card" style="padding:var(--space-8);text-align:center;cursor:pointer">
+            <div style="font-size:3rem;margin-bottom:var(--space-4)">🇧🇷</div>
+            <h3 style="font-size:var(--text-2xl);margin-bottom:var(--space-2)">SELEÇÃO</h3>
+            <p style="color:var(--cor-texto-muted);font-size:var(--text-sm)">Camisas oficiais 2026</p>
+          </a>
+          <a href="/pages/produtos.html?categoria=retro" class="card" style="padding:var(--space-8);text-align:center;cursor:pointer">
+            <div style="font-size:3rem;margin-bottom:var(--space-4)">🏆</div>
+            <h3 style="font-size:var(--text-2xl);margin-bottom:var(--space-2)">RETRÔ</h3>
+            <p style="color:var(--cor-texto-muted);font-size:var(--text-sm)">Clássicos históricos</p>
+          </a>
+          <a href="/pages/produtos.html?categoria=infantil" class="card" style="padding:var(--space-8);text-align:center;cursor:pointer">
+            <div style="font-size:3rem;margin-bottom:var(--space-4)">👦</div>
+            <h3 style="font-size:var(--text-2xl);margin-bottom:var(--space-2)">INFANTIL</h3>
+            <p style="color:var(--cor-texto-muted);font-size:var(--text-sm)">Para os pequenos torcedores</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 🆕 NOVIDADES -->
+    <!-- ============================================================ -->
+    <section class="secao">
+      <div class="container">
+        <div class="secao-titulo-linha">
+          <h2>🆕 NOVIDADES</h2>
+        </div>
+        <div class="grid-4" id="gridNovidades">
+          <div class="card skeleton" style="height:360px"></div>
+          <div class="card skeleton" style="height:360px"></div>
+        </div>
+        <div style="text-align:center;margin-top:var(--space-8)">
+          <a href="/pages/produtos.html" class="btn btn-secundario btn-lg">Ver todos os produtos →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 🎯 BANNER COPA 2026 -->
+    <!-- ============================================================ -->
+    <section style="padding:var(--space-12) 0;background:linear-gradient(135deg,var(--cor-primaria),#1565C0)">
+      <div class="container" style="text-align:center">
+        <h2 style="font-size:clamp(2rem,6vw,4rem);margin-bottom:var(--space-4)">
+          <span style="color:var(--cor-secundaria)">COPA 2026</span><br>
+          ESTÁ CHEGANDO
+        </h2>
+        <p style="color:rgba(255,255,255,0.8);max-width:500px;margin:0 auto var(--space-8)">
+          Vista o verde e amarelo com orgulho. Coleção oficial disponível agora.
+        </p>
+        <a href="/pages/produtos.html?categoria=selecao" class="btn btn-acento btn-lg">
+          🛒 Comprar Agora
+        </a>
+      </div>
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- ⭐ DEPOIMENTOS -->
+    <!-- ============================================================ -->
+    <section class="secao">
+      <div class="container">
+        <div class="secao-header">
+          <h2>O que dizem nossos <span style="color:var(--cor-secundaria)">Clientes</span></h2>
+        </div>
+
+        <div class="grid-3" style="gap:var(--space-6)">
+          <div class="card" style="padding:var(--space-6)">
+            <div style="color:var(--cor-secundaria);margin-bottom:var(--space-3)">⭐⭐⭐⭐⭐</div>
+            <p style="color:var(--cor-texto-muted);margin-bottom:var(--space-4)">"Qualidade incrível! A camisa chegou em 3 dias e o tecido é muito bom. Já comprei a segunda."</p>
+            <div style="display:flex;align-items:center;gap:var(--space-3)">
+              <div style="width:40px;height:40px;background:var(--cor-primaria);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">M</div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm)">Marcos Silva</div>
+                <div style="font-size:var(--text-xs);color:var(--cor-texto-muted)">São Paulo, SP</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:var(--space-6)">
+            <div style="color:var(--cor-secundaria);margin-bottom:var(--space-3)">⭐⭐⭐⭐⭐</div>
+            <p style="color:var(--cor-texto-muted);margin-bottom:var(--space-4)">"A camisa retrô de 1970 é simplesmente perfeita. Parece vintage mas com qualidade moderna. Recomendo!"</p>
+            <div style="display:flex;align-items:center;gap:var(--space-3)">
+              <div style="width:40px;height:40px;background:var(--cor-acento);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">A</div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm)">Ana Ferreira</div>
+                <div style="font-size:var(--text-xs);color:var(--cor-texto-muted)">Rio de Janeiro, RJ</div>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="padding:var(--space-6)">
+            <div style="color:var(--cor-secundaria);margin-bottom:var(--space-3)">⭐⭐⭐⭐⭐</div>
+            <p style="color:var(--cor-texto-muted);margin-bottom:var(--space-4)">"Comprei o kit infantil pro meu filho e ele não tira mais! Qualidade excelente e entrega rápida."</p>
+            <div style="display:flex;align-items:center;gap:var(--space-3)">
+              <div style="width:40px;height:40px;background:var(--cor-secundaria);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--cor-fundo)">R</div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm)">Roberto Costa</div>
+                <div style="font-size:var(--text-xs);color:var(--cor-texto-muted)">Belo Horizonte, MG</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- 📄 FOOTER -->
+  <!-- ============================================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="header-logo" style="font-size:var(--text-3xl)">
+            <span>BRAG</span><span>SHIRT</span>
+          </div>
+          <p>Camisetas da Seleção Brasileira com qualidade premium. Para quem vive o futebol de verdade.</p>
+          <div style="display:flex;gap:var(--space-3);margin-top:var(--space-4)">
+            <a href="https://instagram.com/bragshirt" target="_blank" rel="noopener" class="btn-icone" style="background:var(--cor-superficie-2)">📸</a>
+            <a href="https://facebook.com/bragshirt" target="_blank" rel="noopener" class="btn-icone" style="background:var(--cor-superficie-2)">📘</a>
+            <a href="https://wa.me/5511999999999" target="_blank" rel="noopener" class="btn-icone" style="background:var(--cor-superficie-2)">💬</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Loja</h4>
+          <ul>
+            <li><a href="/pages/produtos.html">Todos Produtos</a></li>
+            <li><a href="/pages/produtos.html?categoria=selecao">Seleção 2026</a></li>
+            <li><a href="/pages/produtos.html?categoria=retro">Retrô</a></li>
+            <li><a href="/pages/produtos.html?categoria=infantil">Infantil</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Conta</h4>
+          <ul>
+            <li><a href="/pages/minha-conta.html">Minha Conta</a></li>
+            <li><a href="/pages/minha-conta.html#pedidos">Meus Pedidos</a></li>
+            <li><a href="/pages/login.html">Entrar</a></li>
+            <li><a href="/pages/login.html#cadastro">Cadastrar</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Ajuda</h4>
+          <ul>
+            <li><a href="/pages/sobre.html">Sobre nós</a></li>
+            <li><a href="/pages/politica-privacidade.html">Privacidade</a></li>
+            <li><a href="/pages/termos-uso.html">Termos de Uso</a></li>
+            <li><a href="/pages/lgpd.html">LGPD</a></li>
+            <li><a href="/pages/contato.html">Contato</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 BragShirt. Todos os direitos reservados.</p>
+        <p style="display:flex;align-items:center;gap:var(--space-2)">
+          <span>Pague com</span>
+          <strong style="color:var(--cor-secundaria)">Mercado Pago</strong>
+          <span>•</span>
+          <span>Entrega via</span>
+          <strong style="color:var(--cor-secundaria)">Melhor Envio</strong>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- 💬 BOTÃO WHATSAPP FLUTUANTE -->
+  <!-- ============================================================ -->
+  <a
+    href="https://wa.me/5511999999999?text=Olá!%20Vim%20pelo%20site%20BragShirt%20e%20gostaria%20de%20mais%20informações."
+    target="_blank"
+    rel="noopener"
+    class="btn-whatsapp-float"
+    aria-label="Falar pelo WhatsApp"
+  >
+    💬
+  </a>
+
+  <!-- ============================================================ -->
+  <!-- 📜 SCRIPTS -->
+  <!-- ============================================================ -->
+  <script type="module">
+    import { CONFIG, aplicarTema } from '/js/config.js';
+    import { getUsuarioAtual } from '/js/supabase.js';
+    import { getCarrinho, atualizarContadorHeader, renderizarMiniCarrinho } from '/js/carrinho.js';
+    import { PRODUTOS_MOCK, formatarMoeda } from '/js/produtos.js';
+
+    // Aplicar tema
+    aplicarTema();
+
+    // ——— HEADER: estado do usuário ———
+    async function carregarUsuario() {
+      const usuario = await getUsuarioAtual();
+      const headerEl = document.getElementById('headerUsuario');
+      if (usuario) {
+        const nome = usuario.perfil?.nome || usuario.email.split('@')[0];
+        headerEl.innerHTML = `
+          <a href="/pages/minha-conta.html" class="btn btn-sm btn-ghost">👤 ${nome}</a>
+        `;
+      }
+    }
+    carregarUsuario();
+
+    // ——— CONTADOR CARRINHO ———
+    atualizarContadorHeader();
+
+    // ——— MENU MOBILE ———
+    const btnMenu = document.getElementById('btnMenuMobile');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const menuDrawer = document.getElementById('menuDrawer');
+    const btnFecharMenu = document.getElementById('btnFecharMenu');
+
+    const abrirMenu = () => { menuOverlay.classList.add('aberto'); menuDrawer.classList.add('aberto'); };
+    const fecharMenu = () => { menuOverlay.classList.remove('aberto'); menuDrawer.classList.remove('aberto'); };
+
+    btnMenu?.addEventListener('click', abrirMenu);
+    btnFecharMenu?.addEventListener('click', fecharMenu);
+    menuOverlay?.addEventListener('click', fecharMenu);
+
+    // ——— CARRINHO DRAWER ———
+    const btnAbrirCarrinho = document.getElementById('btnAbrirCarrinho');
+    const carrinhoOverlay = document.getElementById('carrinhoOverlay');
+    const carrinhoDrawer = document.getElementById('carrinhoDrawer');
+    const btnFecharCarrinho = document.getElementById('btnFecharCarrinho');
+    const miniConteudo = document.getElementById('miniCarrinhoConteudo');
+
+    const abrirCarrinho = () => {
+      renderizarMiniCarrinho(miniConteudo);
+      carrinhoOverlay.classList.add('aberto');
+      carrinhoDrawer.classList.add('aberto');
+    };
+    const fecharCarrinho = () => {
+      carrinhoOverlay.classList.remove('aberto');
+      carrinhoDrawer.classList.remove('aberto');
+    };
+
+    btnAbrirCarrinho?.addEventListener('click', abrirCarrinho);
+    btnFecharCarrinho?.addEventListener('click', fecharCarrinho);
+    carrinhoOverlay?.addEventListener('click', fecharCarrinho);
+
+    // Atualizar mini-carrinho quando carrinho muda
+    window.addEventListener('carrinhoAtualizado', () => {
+      if (carrinhoDrawer.classList.contains('aberto')) {
+        renderizarMiniCarrinho(miniConteudo);
+      }
+    });
+
+    // ——— PRODUTOS: Destaques ———
+    function renderizarCardProduto(produto) {
+      const desconto = produto.preco_antigo
+        ? Math.round((1 - produto.preco_antigo / produto.preco_antigo) * 100) // será 0
+        : 0;
+      const pctDesc = produto.preco_antigo
+        ? Math.round((1 - produto.preco / produto.preco_antigo) * 100)
+        : 0;
+
+      return `
+        <a href="/pages/produto.html?slug=${produto.slug}" class="card card-produto">
+          <div class="imagem-wrapper">
+            <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--cor-superficie-2),var(--cor-superficie));display:flex;align-items:center;justify-content:center;font-size:4rem">👕</div>
+            ${produto.destaque ? '<span class="badge badge-destaque">Destaque</span>' : ''}
+            ${pctDesc > 0 ? `<span class="badge badge-oferta" style="top:var(--space-3);right:var(--space-3);left:auto">-${pctDesc}%</span>` : ''}
+          </div>
+          <div class="info">
+            <div class="nome">${produto.nome}</div>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin:var(--space-2) 0">
+              ${produto.tamanhos.slice(0,4).map(t => `<span style="font-size:var(--text-xs);padding:2px 6px;background:var(--cor-superficie-2);border-radius:var(--radius-sm);border:1px solid var(--cor-borda)">${t}</span>`).join('')}
+            </div>
+            <div class="precos">
+              <span class="preco-atual">${new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(produto.preco)}</span>
+              ${produto.preco_antigo ? `<span class="preco-antigo">${new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(produto.preco_antigo)}</span>` : ''}
+            </div>
+            <div style="margin-top:var(--space-3);font-size:var(--text-xs);color:var(--cor-texto-muted)">
+              em até 12x sem juros
+            </div>
+          </div>
+        </a>
+      `;
+    }
+
+    // Renderizar destaques
+    const destaques = PRODUTOS_MOCK.filter(p => p.destaque);
+    document.getElementById('gridDestaques').innerHTML = destaques.map(renderizarCardProduto).join('');
+
+    // Renderizar novidades (não destaque)
+    const novidades = PRODUTOS_MOCK.filter(p => !p.destaque).slice(0, 2);
+    document.getElementById('gridNovidades').innerHTML = novidades.map(renderizarCardProduto).join('');
+  </script>
+</body>
+</html>
